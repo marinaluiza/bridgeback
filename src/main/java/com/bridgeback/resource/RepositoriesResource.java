@@ -20,20 +20,23 @@ public class RepositoriesResource {
 
     @RequestMapping(value = "/repositories/{name}", method = RequestMethod.GET)
     public ResponseEntity<List<Repository>> listRepositories(@PathVariable String name) {
-        final String uri = "https://api.github.com/search/repositories?q=" + name;
-        return getResponse(uri);
+        try {
+            ResponseEntity<String> response = getResponse("https://api.github.com/search/repositories?q=" + name);
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(response.getBody()).path("items");
+            List<Repository> repositories = Arrays.asList(mapper.readValue(root.toString(), Repository[].class));
+            return ResponseEntity.status(HttpStatus.OK).body(repositories);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+
     }
 
     @RequestMapping(value = "/users/{owner}/repos", method = RequestMethod.GET)
     public ResponseEntity<List<Repository>> getUserRepository(@PathVariable String owner) {
-        final String uri = "https://api.github.com/users/" + owner + "/repos";
-        return getResponse(uri);
-    }
-
-    private ResponseEntity<List<Repository>> getResponse(String uri) {
         try {
-            RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<String> response = restTemplate.getForEntity(uri, String.class);
+            ResponseEntity<String> response = getResponse("https://api.github.com/users/" + owner + "/repos");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(response.getBody());
             List<Repository> repositories = Arrays.asList(mapper.readValue(root.toString(), Repository[].class));
@@ -42,5 +45,11 @@ public class RepositoriesResource {
             e.printStackTrace();
         }
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+
+    }
+
+    private ResponseEntity<String> getResponse(String uri) {
+        RestTemplate restTemplate = new RestTemplate();
+        return restTemplate.getForEntity(uri, String.class);
     }
 }
