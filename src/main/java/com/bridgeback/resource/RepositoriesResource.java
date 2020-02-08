@@ -28,9 +28,8 @@ public class RepositoriesResource {
             return ResponseEntity.status(HttpStatus.OK).body(repositories);
         } catch (Exception e) {
             e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
         }
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
-
     }
 
     @RequestMapping(value = "/users/{owner}/repos", method = RequestMethod.GET)
@@ -43,9 +42,8 @@ public class RepositoriesResource {
             return ResponseEntity.status(HttpStatus.OK).body(repositories);
         } catch (Exception e) {
             e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
         }
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
-
     }
 
     private ResponseEntity<String> getResponse(String uri) {
